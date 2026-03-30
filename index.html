@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dónde Denunciar — Violencia de Género en Paraguay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --bg: #0f0f13;
+      --surface: #18181f;
+      --surface2: #1f1f28;
+      --border: #2a2a36;
+      --accent: #e05c7a;
+      --accent2: #f0a0b0;
+      --accent3: #7c6af7;
+      --text: #f0eef5;
+      --text-muted: #8a8799;
+      --emergency: #ff4757;
+      --legal: #7c6af7;
+      --psicologico: #2ecc71;
+      --albergue: #f39c12;
+      --policial: #3498db;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* HEADER */
+    header {
+      position: relative;
+      padding: 2rem 2rem 0;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+    }
+
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .logo-area h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      font-weight: 800;
+      line-height: 1.1;
+      color: var(--text);
+    }
+
+    .logo-area h1 span {
+      color: var(--accent);
+    }
+
+    .logo-area p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+      font-weight: 300;
+      max-width: 420px;
+    }
+
+    .sos-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: linear-gradient(135deg, #c0392b, var(--emergency));
+      padding: 0.75rem 1.25rem;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(255,71,87,0.35);
+      flex-shrink: 0;
+    }
+
+    .sos-badge:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(255,71,87,0.5);
+    }
+
+    .sos-badge .phone-icon {
+      font-size: 1.4rem;
+    }
+
+    .sos-badge .sos-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sos-badge .sos-number {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .sos-badge .sos-label {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.8);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* NAV TABS */
+    .nav-tabs {
+      display: flex;
+      gap: 0;
+      margin-top: 1.5rem;
+      border-bottom: none;
+    }
+
+    .nav-tab {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .nav-tab:hover { color: var(--text); }
+
+    .nav-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* MAIN LAYOUT */
+    .main-layout {
+      display: flex;
+      height: calc(100vh - 140px);
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 380px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1rem 1.25rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      transition: border-color 0.2s;
+    }
+
+    .search-box:focus-within { border-color: var(--accent); }
+
+    .search-box input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+    }
+
+    .search-box input::placeholder { color: var(--text-muted); }
+
+    .filter-chips {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      padding: 0.75rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .chip {
+      font-size: 0.72rem;
+      font-weight: 500;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .chip:hover { color: var(--text); border-color: #555; }
+    .chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .chip[data-cat="legal"].active { background: var(--legal); border-color: var(--legal); }
+    .chip[data-cat="psicologico"].active { background: var(--psicologico); border-color: var(--psicologico); }
+    .chip[data-cat="albergue"].active { background: var(--albergue); border-color: var(--albergue); }
+    .chip[data-cat="policial"].active { background: var(--policial); border-color: var(--policial); }
+    .chip[data-cat="emergencia"].active { background: var(--emergency); border-color: var(--emergency); }
+
+    .results-count {
+      padding: 0.5rem 1.25rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .places-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.5rem 0;
+    }
+
+    .places-list::-webkit-scrollbar { width: 4px; }
+    .places-list::-webkit-scrollbar-track { background: transparent; }
+    .places-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .place-card {
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+      position: relative;
+    }
+
+    .place-card:hover, .place-card.active {
+      background: var(--surface2);
+    }
+
+    .place-card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .place-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .place-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+      flex: 1;
+    }
+
+    .place-type-badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+    }
+
+    .place-address {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+      margin-left: 3rem;
+      line-height: 1.4;
+    }
+
+    .place-tags {
+      display: flex;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+      margin-top: 0.4rem;
+      margin-left: 3rem;
+    }
+
+    .tag {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .place-phone {
+      font-size: 0.78rem;
+      margin-top: 0.35rem;
+      margin-left: 3rem;
+      font-weight: 500;
+    }
+
+    /* MAP */
+    #map-container {
+      flex: 1;
+      position: relative;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* POPUP */
+    .popup-content {
+      font-family: 'DM Sans', sans-serif;
+      min-width: 220px;
+      max-width: 280px;
+    }
+
+    .popup-content h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      color: #1a1a2e;
+    }
+
+    .popup-content p {
+      font-size: 0.78rem;
+      color: #444;
+      line-height: 1.4;
+      margin-bottom: 0.25rem;
+    }
+
+    .popup-content .popup-phone {
+      font-weight: 600;
+      color: #c0392b;
+    }
+
+    .popup-content .popup-hours {
+      font-size: 0.72rem;
+      color: #666;
+    }
+
+    /* DETAIL PANEL */
+    .detail-panel {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 1.25rem;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 50;
+      max-height: 45%;
+      overflow-y: auto;
+    }
+
+    .detail-panel.open { transform: translateY(0); }
+
+    .detail-close {
+      position: absolute;
+      top: 0.75rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0.2rem;
+    }
+
+    .detail-close:hover { color: var(--text); }
+
+    .detail-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+      padding-right: 2rem;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .detail-item label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .detail-item p {
+      font-size: 0.82rem;
+      color: var(--text);
+      margin-top: 0.1rem;
+      line-height: 1.4;
+    }
+
+    .detail-services {
+      display: flex;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+
+    .service-tag {
+      font-size: 0.72rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+
+    .btn-directions {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.75rem;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-directions:hover { background: #c94d6a; }
+
+    /* EMERGENCY BANNER */
+    .emergency-bar {
+      background: linear-gradient(90deg, #c0392b, var(--emergency), #c0392b);
+      background-size: 200% 100%;
+      animation: gradShift 4s linear infinite;
+      padding: 0.5rem 1rem;
+      text-align: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.08em;
+    }
+
+    @keyframes gradShift {
+      0% { background-position: 0% 0%; }
+      100% { background-position: 200% 0%; }
+    }
+
+    /* LEGEND */
+    .map-legend {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem;
+      z-index: 40;
+      min-width: 150px;
+    }
+
+    .legend-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .legend-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    /* PANEL VIEW (teléfonos) */
+    .panel-view {
+      display: none;
+      padding: 1.25rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .panel-view.visible { display: block; }
+    .places-list.hidden { display: none; }
+
+    .hotline-grid {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .hotline-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+    }
+
+    .hotline-number {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+    }
+
+    .hotline-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 0.15rem;
+      color: var(--text);
+    }
+
+    .hotline-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+      line-height: 1.4;
+    }
+
+    /* Leaflet dark map style override */
+    .leaflet-container { background: #1a1a2e; }
+
+    .leaflet-popup-content-wrapper {
+      border-radius: 10px !important;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25) !important;
+    }
+
+    @media (max-width: 768px) {
+      .main-layout { flex-direction: column; height: auto; }
+      .sidebar { width: 100%; height: 50vh; }
+      #map-container { height: 50vh; }
+      .map-legend { display: none; }
+      header { padding: 1rem 1rem 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="emergency-bar">
+  🆘 &nbsp;EMERGENCIA: Llamá al <strong>911</strong> &nbsp;|&nbsp; SOS Mujer: <strong>137</strong> (gratuito, 24hs) &nbsp;|&nbsp; Defensoría Pública: <strong>133</strong>
+</div>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-area">
+      <h1>Dónde <span>Denunciar</span></h1>
+      <p>Mapa de recursos de atención y denuncia por violencia de género en Paraguay · Todos los servicios son gratuitos</p>
+    </div>
+    <a href="tel:137" class="sos-badge">
+      <span class="phone-icon">📞</span>
+      <span class="sos-text">
+        <span class="sos-number">137</span>
+        <span class="sos-label">SOS Mujer · 24hs</span>
+      </span>
+    </a>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('mapa', this)">Mapa</button>
+    <button class="nav-tab" onclick="switchTab('telefonos', this)">Teléfonos de Emergencia</button>
+    <button class="nav-tab" onclick="switchTab('info', this)">¿Cómo denunciar?</button>
+  </div>
+</header>
+
+<div class="main-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="Buscar por nombre o ciudad..." oninput="filterCards()" />
+      </div>
+    </div>
+    <div class="filter-chips">
+      <button class="chip active" data-cat="all" onclick="filterByCategory('all', this)">Todos</button>
+      <button class="chip" data-cat="emergencia" onclick="filterByCategory('emergencia', this)">Emergencia</button>
+      <button class="chip" data-cat="legal" onclick="filterByCategory('legal', this)">Legal</button>
+      <button class="chip" data-cat="psicologico" onclick="filterByCategory('psicologico', this)">Psicológico</button>
+      <button class="chip" data-cat="albergue" onclick="filterByCategory('albergue', this)">Albergue</button>
+      <button class="chip" data-cat="policial" onclick="filterByCategory('policial', this)">Policial</button>
+    </div>
+    <div class="results-count" id="resultsCount">Mostrando 12 lugares</div>
+
+    <div class="places-list" id="placesList"></div>
+
+    <!-- TAB: teléfonos -->
+    <div class="panel-view" id="telefonosPanel">
+      <div class="hotline-grid" id="hotlineGrid"></div>
+    </div>
+
+    <!-- TAB: info -->
+    <div class="panel-view" id="infoPanel" style="font-size:0.85rem; color: var(--text-muted); line-height:1.6;">
+      <h3 style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--text);margin-bottom:0.75rem;">Pasos para hacer una denuncia</h3>
+      <p><strong style="color:var(--accent)">1. Llamá al 137</strong> — Línea SOS Mujer, gratuita, 24 horas. Te orientarán sobre los pasos a seguir.</p>
+      <br/>
+      <p><strong style="color:var(--accent2)">2. Acudí a la comisaría más cercana</strong> — No necesitás cédula de identidad para denunciar. Cualquier persona que conozca el caso puede hacerlo.</p>
+      <br/>
+      <p><strong style="color:var(--accent2)">3. Ministerio Público (Fiscalía)</strong> — Presentá la denuncia en cualquier sede fiscal. También podés ir a un Juzgado de Paz.</p>
+      <br/>
+      <p><strong style="color:var(--accent2)">4. SEDAMUR o Ciudad Mujer</strong> — Para apoyo psicológico, legal y seguimiento de caso, de forma gratuita.</p>
+      <br/>
+      <p><strong style="color:var(--accent2)">5. Defensoría Pública</strong> — Si necesitás patrocinio legal gratuito, llamá al 133 (Ley N° 5777/16).</p>
+      <br/>
+      <p style="font-size:0.78rem;color:#666;border-top:1px solid var(--border);padding-top:0.75rem;">
+        ⚠️ En ningún caso se puede rechazar la recepción de una denuncia. Todas las actuaciones son reservadas y gratuitas.
+      </p>
+    </div>
+  </aside>
+
+  <!-- MAP -->
+  <div id="map-container">
+    <div id="map"></div>
+
+    <div class="map-legend">
+      <div class="legend-title">Tipos de servicio</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ff4757"></div><span class="legend-label">Emergencia / SOS</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#7c6af7"></div><span class="legend-label">Asesoramiento Legal</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#2ecc71"></div><span class="legend-label">Apoyo Psicológico</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f39c12"></div><span class="legend-label">Albergue / Refugio</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3498db"></div><span class="legend-label">Policía / Comisaría</span></div>
+    </div>
+
+    <!-- Detail panel -->
+    <div class="detail-panel" id="detailPanel">
+      <button class="detail-close" onclick="closeDetail()">✕</button>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PLACES = [
+  {
+    id: 1,
+    name: "SEDAMUR — Ministerio de la Mujer",
+    category: "legal",
+    icon: "⚖️",
+    address: "Pte. Franco c/ Ayolas, Edif. Ayfra, Planta Baja, Asunción",
+    phone: "(021) 452060 / 452061",
+    hours: "Lun–Vie: 07:00 – 18:00",
+    email: "atencion@mujer.gov.py",
+    services: ["Orientación legal", "Apoyo psicológico", "Seguimiento de casos", "Derivación"],
+    lat: -25.2865,
+    lng: -57.6378,
+    city: "Asunción"
+  },
+  {
+    id: 2,
+    name: "Centro Ciudad Mujer",
+    category: "psicologico",
+    icon: "🏛️",
+    address: "Virgen del Carmen entre 16 de Julio y Avda. Von Poleski, Villa Elisa",
+    phone: "(021) 412-4000",
+    hours: "Lun/Mar/Jue: 06:00–17:30 | Mié/Vie: 07:00–14:30",
+    email: "ciudadmujer@mujer.gov.py",
+    services: ["Atención integral", "Salud sexual", "Empleo", "Prevención VBG", "Guardería"],
+    lat: -25.3519,
+    lng: -57.5748,
+    city: "Villa Elisa"
+  },
+  {
+    id: 3,
+    name: "CRM Ciudad del Este",
+    category: "legal",
+    icon: "🏢",
+    address: "Campo Vía casi América, Área 4, Ciudad del Este",
+    phone: "061 507-531",
+    hours: "Lun–Vie: 07:00 – 15:00",
+    services: ["Atención jurídica", "Apoyo psicológico", "Trabajo social", "Seguimiento"],
+    lat: -25.5102,
+    lng: -54.6136,
+    city: "Ciudad del Este"
+  },
+  {
+    id: 4,
+    name: "CRM Pedro Juan Caballero",
+    category: "legal",
+    icon: "🏢",
+    address: "Pedro Juan Caballero, Amambay",
+    phone: "0336 275-611",
+    hours: "Lun–Vie: 07:00 – 15:00",
+    services: ["Atención jurídica", "Apoyo psicológico", "Trabajo social"],
+    lat: -22.5386,
+    lng: -55.7314,
+    city: "Pedro Juan Caballero"
+  },
+  {
+    id: 5,
+    name: "CRM Filadelfia",
+    category: "legal",
+    icon: "🏢",
+    address: "Filadelfia, Boquerón",
+    phone: "0491 432-370",
+    hours: "Lun–Vie: 07:00 – 15:00",
+    services: ["Atención jurídica", "Apoyo psicológico", "Trabajo social"],
+    lat: -22.3535,
+    lng: -60.0353,
+    city: "Filadelfia"
+  },
+  {
+    id: 6,
+    name: "CRM Curuguaty",
+    category: "legal",
+    icon: "🏢",
+    address: "Curuguaty, Canindeyú",
+    phone: "048 210-515",
+    hours: "Lun–Vie: 07:00 – 15:00",
+    services: ["Atención jurídica", "Apoyo psicológico", "Trabajo social"],
+    lat: -24.4773,
+    lng: -55.6966,
+    city: "Curuguaty"
+  },
+  {
+    id: 7,
+    name: "Policía Nacional — Central Asunción",
+    category: "policial",
+    icon: "🚔",
+    address: "Asunción — llamar al 911 o acudir a la comisaría más cercana",
+    phone: "911",
+    hours: "24 horas, todos los días",
+    services: ["Denuncia formal", "Medidas de protección", "Intervención de emergencia"],
+    lat: -25.2917,
+    lng: -57.6419,
+    city: "Asunción"
+  },
+  {
+    id: 8,
+    name: "Ministerio Público — Fiscalía Asunción",
+    category: "legal",
+    icon: "🏛️",
+    address: "Nuestra Señora de la Asunción 737, Asunción",
+    phone: "(021) 415-3000",
+    hours: "Lun–Vie: 07:00 – 15:00",
+    services: ["Denuncia penal", "Proceso judicial", "Acompañamiento legal"],
+    lat: -25.2941,
+    lng: -57.6423,
+    city: "Asunción"
+  },
+  {
+    id: 9,
+    name: "Defensoría Pública — Atención a Víctimas",
+    category: "legal",
+    icon: "⚖️",
+    address: "Asunción, Paraguay",
+    phone: "133",
+    hours: "Lun–Vie: 07:00 – 15:00",
+    services: ["Patrocinio legal gratuito", "Ley 5777/16", "Asesoramiento"],
+    lat: -25.2884,
+    lng: -57.6460,
+    city: "Asunción"
+  },
+  {
+    id: 10,
+    name: "Oficina de Atención Permanente — Poder Judicial",
+    category: "legal",
+    icon: "⚖️",
+    address: "Palacio de Justicia, Asunción",
+    phone: "(021) 424-2000",
+    hours: "24 horas (fuera de horario de juzgados y fines de semana)",
+    services: ["Medidas de protección urgente", "Juzgado de Paz", "Denuncia fuera de horario"],
+    lat: -25.2911,
+    lng: -57.6369,
+    city: "Asunción"
+  },
+  {
+    id: 11,
+    name: "Albergue del Ministerio de la Mujer (Asunción)",
+    category: "albergue",
+    icon: "🏠",
+    address: "Dirección reservada por seguridad — contactar al 137",
+    phone: "137",
+    hours: "24 horas",
+    services: ["Alojamiento temporal", "Seguridad personal", "Apoyo psicológico", "Asistencia legal", "Atención médica"],
+    lat: -25.2980,
+    lng: -57.6510,
+    city: "Asunción"
+  },
+  {
+    id: 12,
+    name: "Femi Unidas Paraguay",
+    category: "psicologico",
+    icon: "💜",
+    address: "Asunción, Paraguay",
+    phone: "0984 349-893",
+    hours: "Lun–Vie: 09:00 – 19:00",
+    services: ["Información sobre derechos", "Orientación gratuita", "Red de voluntarias", "Acompañamiento"],
+    lat: -25.3010,
+    lng: -57.6370,
+    city: "Asunción"
+  },
+];
+
+const HOTLINES = [
+  { number: "137", name: "SOS Mujer", color: "#ff4757", desc: "Línea nacional gratuita de atención a mujeres víctimas de violencia. 24 horas, todos los días, desde cualquier teléfono.", hours: "24hs / 365 días" },
+  { number: "911", name: "Policía Nacional — Emergencias", color: "#3498db", desc: "Para situaciones de riesgo inmediato. Cualquier persona puede llamar aunque no sea la víctima.", hours: "24hs / 365 días" },
+  { number: "133", name: "Defensoría Pública", color: "#7c6af7", desc: "Patrocinio legal gratuito para mujeres en situación de violencia bajo la Ley Nº 5777/16.", hours: "Lun–Vie, horario de oficina" },
+  { number: "147", name: "Fono Ayuda Niñez", color: "#f39c12", desc: "Atención a niñas y adolescentes víctimas de violencia o abuso.", hours: "24hs / 365 días" },
+  { number: "(021) 452060", name: "SEDAMUR", color: "#e05c7a", desc: "Orientación legal y psicológica gratuita. Ministerio de la Mujer.", hours: "Lun–Vie: 07:00–18:00" },
+  { number: "(021) 412-4000", name: "Centro Ciudad Mujer", color: "#2ecc71", desc: "Atención integral para mujeres en Villa Elisa.", hours: "Lun–Vie: 07:00–14:30" },
+];
+
+const CAT_COLORS = {
+  emergencia: "#ff4757",
+  legal: "#7c6af7",
+  psicologico: "#2ecc71",
+  albergue: "#f39c12",
+  policial: "#3498db",
+};
+
+let currentFilter = "all";
+let activeMarkerId = null;
+let markers = {};
+
+// Init map
+const map = L.map('map', { zoomControl: false }).setView([-23.4, -57.5], 6);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© OpenStreetMap, © CARTO',
+  subdomains: 'abcd',
+  maxZoom: 19
+}).addTo(map);
+
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+function createMarkerIcon(category, active = false) {
+  const color = CAT_COLORS[category] || "#999";
+  const size = active ? 38 : 28;
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      width:${size}px; height:${size}px;
+      background:${color};
+      border: 3px solid ${active ? '#fff' : 'rgba(255,255,255,0.3)'};
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      box-shadow: 0 3px 12px rgba(0,0,0,0.4);
+      transition: all 0.2s;
+    "></div>`,
+    iconSize: [size, size],
+    iconAnchor: [size/2, size],
+    popupAnchor: [0, -size]
+  });
+}
+
+// Render markers
+PLACES.forEach(place => {
+  const marker = L.marker([place.lat, place.lng], {
+    icon: createMarkerIcon(place.category)
+  }).addTo(map);
+
+  const popupHtml = `
+    <div class="popup-content">
+      <h3>${place.name}</h3>
+      <p>${place.address}</p>
+      <p class="popup-phone">📞 ${place.phone}</p>
+      <p class="popup-hours">🕐 ${place.hours}</p>
+    </div>`;
+
+  marker.bindPopup(popupHtml);
+  marker.on('click', () => openDetail(place.id));
+  markers[place.id] = marker;
+});
+
+// Render sidebar cards
+function renderCards(filterCat = "all", searchText = "") {
+  const list = document.getElementById('placesList');
+  list.innerHTML = '';
+  let count = 0;
+  const lower = searchText.toLowerCase();
+
+  PLACES.forEach(place => {
+    const matchCat = filterCat === "all" || place.category === filterCat;
+    const matchSearch = !searchText ||
+      place.name.toLowerCase().includes(lower) ||
+      place.city.toLowerCase().includes(lower) ||
+      place.address.toLowerCase().includes(lower);
+
+    if (matchCat && matchSearch) {
+      count++;
+      const color = CAT_COLORS[place.category];
+      const catLabel = { emergencia: "Emergencia", legal: "Legal", psicologico: "Psicológico", albergue: "Albergue", policial: "Policial" };
+      const card = document.createElement('div');
+      card.className = 'place-card';
+      card.id = `card-${place.id}`;
+      card.innerHTML = `
+        <div class="place-card-top">
+          <div class="place-icon" style="background:${color}22; color:${color}">${place.icon}</div>
+          <span class="place-name">${place.name}</span>
+          <span class="place-type-badge" style="background:${color}22; color:${color}">${catLabel[place.category] || place.category}</span>
+        </div>
+        <div class="place-address">${place.address}</div>
+        <div class="place-phone" style="color:${color}">📞 ${place.phone}</div>
+        <div class="place-tags">
+          ${place.services.slice(0,3).map(s => `<span class="tag" style="background:${color}20; color:${color}">${s}</span>`).join('')}
+        </div>`;
+      card.addEventListener('click', () => {
+        map.flyTo([place.lat, place.lng], 14, { duration: 0.8 });
+        openDetail(place.id);
+        markers[place.id].openPopup();
+      });
+      list.appendChild(card);
+    }
+  });
+
+  document.getElementById('resultsCount').textContent = `Mostrando ${count} lugar${count !== 1 ? 'es' : ''}`;
+}
+
+function filterByCategory(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards(cat, document.getElementById('searchInput').value);
+}
+
+function filterCards() {
+  renderCards(currentFilter, document.getElementById('searchInput').value);
+}
+
+function openDetail(id) {
+  const place = PLACES.find(p => p.id === id);
+  if (!place) return;
+  const color = CAT_COLORS[place.category];
+
+  // Highlight card
+  document.querySelectorAll('.place-card').forEach(c => c.classList.remove('active'));
+  const card = document.getElementById(`card-${id}`);
+  if (card) { card.classList.add('active'); card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+
+  // Change marker
+  if (activeMarkerId && markers[activeMarkerId]) {
+    const prev = PLACES.find(p => p.id === activeMarkerId);
+    markers[activeMarkerId].setIcon(createMarkerIcon(prev.category, false));
+  }
+  markers[id].setIcon(createMarkerIcon(place.category, true));
+  activeMarkerId = id;
+
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`;
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-name">${place.icon} ${place.name}</div>
+    <div style="font-size:0.78rem; color:${color}; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem;">${place.category}</div>
+    <div class="detail-grid">
+      <div class="detail-item"><label>Dirección</label><p>${place.address}</p></div>
+      <div class="detail-item"><label>Teléfono</label><p style="color:${color}; font-weight:600">${place.phone}</p></div>
+      <div class="detail-item"><label>Horario</label><p>${place.hours}</p></div>
+      ${place.email ? `<div class="detail-item"><label>Email</label><p>${place.email}</p></div>` : ''}
+    </div>
+    <div class="detail-services">
+      ${place.services.map(s => `<span class="service-tag" style="background:${color}20; color:${color}">${s}</span>`).join('')}
+    </div>
+    <a href="${mapsUrl}" target="_blank" class="btn-directions">📍 Ver en Google Maps</a>`;
+
+  document.getElementById('detailPanel').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detailPanel').classList.remove('open');
+  if (activeMarkerId && markers[activeMarkerId]) {
+    const prev = PLACES.find(p => p.id === activeMarkerId);
+    markers[activeMarkerId].setIcon(createMarkerIcon(prev.category, false));
+    activeMarkerId = null;
+  }
+  document.querySelectorAll('.place-card').forEach(c => c.classList.remove('active'));
+}
+
+// Hotlines panel
+function renderHotlines() {
+  const grid = document.getElementById('hotlineGrid');
+  grid.innerHTML = HOTLINES.map(h => `
+    <div class="hotline-card">
+      <div class="hotline-number" style="color:${h.color}">${h.number}</div>
+      <div class="hotline-name">${h.name}</div>
+      <div class="hotline-desc">${h.desc}</div>
+      <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.3rem;">🕐 ${h.hours}</div>
+    </div>`).join('');
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+
+  const placesList = document.getElementById('placesList');
+  const telefonosPanel = document.getElementById('telefonosPanel');
+  const infoPanel = document.getElementById('infoPanel');
+  const searchHeader = document.querySelector('.sidebar-header');
+  const filterChips = document.querySelector('.filter-chips');
+  const resultsCount = document.getElementById('resultsCount');
+
+  placesList.classList.remove('hidden');
+  telefonosPanel.classList.remove('visible');
+  infoPanel.classList.remove('visible');
+  searchHeader.style.display = '';
+  filterChips.style.display = '';
+  resultsCount.style.display = '';
+
+  if (tab === 'telefonos') {
+    placesList.classList.add('hidden');
+    telefonosPanel.classList.add('visible');
+    searchHeader.style.display = 'none';
+    filterChips.style.display = 'none';
+    resultsCount.style.display = 'none';
+  } else if (tab === 'info') {
+    placesList.classList.add('hidden');
+    infoPanel.classList.add('visible');
+    searchHeader.style.display = 'none';
+    filterChips.style.display = 'none';
+    resultsCount.style.display = 'none';
+  }
+}
+
+// Init
+renderCards();
+renderHotlines();
+</script>
+</body>
+</html>
