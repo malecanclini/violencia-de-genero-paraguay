@@ -860,9 +860,8 @@ let markers = {};
 // Init map
 const map = L.map('map', { zoomControl: false }).setView([-23.4, -57.5], 6);
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution: '© OpenStreetMap, © CARTO',
-  subdomains: 'abcd',
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors',
   maxZoom: 19
 }).addTo(map);
 
