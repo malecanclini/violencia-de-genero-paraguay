@@ -1,5 +1,11 @@
 # Dónde Denunciar: Mapa de Recursos para la Atención y Denuncia de Violencia de Género en Paraguay
 
+## Demo
+
+🌐 Aplicación disponible en:
+
+https://violenciadegeneroparaguay.netlify.app/
+
 ## Descripción
 
 **Dónde Denunciar** es una aplicación web interactiva que centraliza información sobre recursos de atención, protección y denuncia para mujeres en situación de violencia de género en Paraguay.
@@ -31,12 +37,12 @@ La herramienta está diseñada para servir como punto de acceso a información c
 ### Búsqueda y filtrado
 
 - Búsqueda por nombre de institución, dirección o ciudad.
-- Filtros por tipo de servicio: 
-    - Emergencia
-    - Asesoramiento legal
-    - Apoyo psicológico
-    - Albergue o refugio
-    - Atención policial
+- Filtros por tipo de servicio:
+  - Emergencia
+  - Asesoramiento legal
+  - Apoyo psicológico
+  - Albergue o refugio
+  - Atención policial
 
 ### Información detallada
 
@@ -47,7 +53,7 @@ Cada punto incluye:
 - Teléfono de contacto.
 - Horarios de atención.
 - Servicios ofrecidos.
-- Enlace para visualización de ubicación.
+- Ubicación geográfica.
 
 ### Panel de emergencia
 
@@ -70,13 +76,12 @@ Sección informativa con orientación básica sobre los pasos recomendados para 
 
 - Leaflet.js
 - OpenStreetMap
-- CARTO Basemaps
 
 ### Desarrollo web
 
 - HTML5
 - CSS3
-- JavaScript Vanilla
+- JavaScript
 
 ### Diseño y experiencia de usuario
 
@@ -107,6 +112,18 @@ La herramienta busca demostrar el potencial de los sistemas de información geog
 
 ---
 
+## Lo que aprendí
+
+Durante el desarrollo de este proyecto trabajé en:
+
+- Cartografía web con Leaflet.
+- Gestión de información georreferenciada.
+- Diseño de interfaces centradas en las personas usuarias.
+- Organización y visualización de datos espaciales.
+- Publicación de aplicaciones web mediante Netlify.
+
+---
+
 ## Próximas mejoras
 
 - Incorporación de más centros de atención a nivel nacional.
@@ -125,7 +142,8 @@ La herramienta busca demostrar el potencial de los sistemas de información geog
 
 Ingeniera Ambiental interesada en el uso de tecnologías geoespaciales, datos abiertos y herramientas digitales para generar soluciones con impacto social.
 
+---
+
 ## Licencia
 
 Este proyecto se comparte con fines educativos, de investigación y de apoyo a iniciativas de innovación social.
-
