@@ -51,6 +51,11 @@
         <span>🔍</span>
         <input type="text" id="searchInput" placeholder="Buscar por nombre o ciudad..." oninput="filterCards()" />
       </div>
+
+      <!-- FILTRO POR DEPARTAMENTO - LO NUEVO -->
+      <select id="departamentoFilter" onchange="filterByDepartamento(this.value)" style="width:100%; margin-top:0.5rem; padding:0.6rem; border-radius:8px;">
+        <option value="all">Todos los departamentos</option>
+      </select>
     </div>
     <div class="filter-chips">
       <button class="chip active" data-cat="all" onclick="filterByCategory('all', this)">Todos</button>
