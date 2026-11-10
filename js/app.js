@@ -1,42 +1,3 @@
-onEachFeature: function(feature, layer) {
-
-  const p = feature.properties;
-
-  layer.bindPopup(`
-    <b>${p.nombref || "Puesto Policial"}</b><br>
-    📍 ${p.barlocdesc || ""}<br>
-    🏘️ ${p.distdesc || ""}<br>
-    🗺️ ${p.dptodesc || ""}<br>
-    🏢 ${p.desc_class || ""}
-  `);
-
-}
-function cargarDepartamentos(data){
-
-  const select =
-    document.getElementById("departamentoFilter");
-
-  const departamentos =
-    [...new Set(
-      data.features.map(
-        f => f.properties.dptodesc
-      )
-    )].sort();
-
-  departamentos.forEach(dep => {
-
-    const option =
-      document.createElement("option");
-
-    option.value = dep;
-    option.textContent = dep;
-
-    select.appendChild(option);
-
-  });
-
-}
-<script>
 const PLACES = [
   {
     id: 1,
@@ -197,19 +158,18 @@ const PLACES = [
     city: "Asunción"
   },
   {
-  id: 13,
-  name: "Comisaría 3ª Metropolitana",
-  category: "policial",
-  icon: "🚔",
-  address: "Asunción",
-  phone: "911",
-  hours: "24 horas",
-  services: ["Recepción de denuncias", "Protección policial"],
-  lat: -25.2860,
-  lng: -57.6350,
-  city: "Asunción"
-}
-  
+    id: 13,
+    name: "Comisaría 3ª Metropolitana",
+    category: "policial",
+    icon: "🚔",
+    address: "Asunción",
+    phone: "911",
+    hours: "24 horas",
+    services: ["Recepción de denuncias", "Protección policial"],
+    lat: -25.2860,
+    lng: -57.6350,
+    city: "Asunción"
+  }
 ];
 
 const HOTLINES = [
@@ -263,7 +223,7 @@ function createMarkerIcon(category, active = false) {
   });
 }
 
-// Render markers
+// Render markers PLACES
 PLACES.forEach(place => {
   const marker = L.marker([place.lat, place.lng], {
     icon: createMarkerIcon(place.category)
@@ -285,6 +245,7 @@ PLACES.forEach(place => {
 // Render sidebar cards
 function renderCards(filterCat = "all", searchText = "") {
   const list = document.getElementById('placesList');
+  if (!list) return;
   list.innerHTML = '';
   let count = 0;
   const lower = searchText.toLowerCase();
@@ -323,7 +284,8 @@ function renderCards(filterCat = "all", searchText = "") {
     }
   });
 
-  document.getElementById('resultsCount').textContent = `Mostrando ${count} lugar${count !== 1 ? 'es' : ''}`;
+  const rc = document.getElementById('resultsCount');
+  if (rc) rc.textContent = `Mostrando ${count} lugar${count !== 1 ? 'es' : ''}`;
 }
 
 function filterByCategory(cat, btn) {
@@ -342,12 +304,10 @@ function openDetail(id) {
   if (!place) return;
   const color = CAT_COLORS[place.category];
 
-  // Highlight card
   document.querySelectorAll('.place-card').forEach(c => c.classList.remove('active'));
   const card = document.getElementById(`card-${id}`);
   if (card) { card.classList.add('active'); card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
 
-  // Change marker
   if (activeMarkerId && markers[activeMarkerId]) {
     const prev = PLACES.find(p => p.id === activeMarkerId);
     markers[activeMarkerId].setIcon(createMarkerIcon(prev.category, false));
@@ -387,6 +347,7 @@ function closeDetail() {
 // Hotlines panel
 function renderHotlines() {
   const grid = document.getElementById('hotlineGrid');
+  if (!grid) return;
   grid.innerHTML = HOTLINES.map(h => `
     <div class="hotline-card">
       <div class="hotline-number" style="color:${h.color}">${h.number}</div>
@@ -428,6 +389,98 @@ function switchTab(tab, btn) {
     resultsCount.style.display = 'none';
   }
 }
+
+// --- CAPAS GEOJSON REALES DEL REPO ---
+let policialesLayer = null;
+let saludLayer = null;
+let policialesData = null;
+let saludData = null;
+
+function cargarDepartamentos(data) {
+  const select = document.getElementById("departamentoFilter");
+  if (!select) return;
+  // Evitar duplicar opciones si se llama 2 veces
+  if (select.options.length > 1) return;
+  const departamentos = [...new Set(data.features.map(f => f.properties.dptodesc).filter(Boolean))].sort();
+  departamentos.forEach(dep => {
+    const option = document.createElement("option");
+    option.value = dep;
+    option.textContent = dep;
+    select.appendChild(option);
+  });
+}
+
+function filtrarPorDepartamento(dep) {
+  // Policiales
+  if (policialesData && policialesLayer) {
+    map.removeLayer(policialesLayer);
+    const filtrado = dep === "all" ? policialesData : { type: "FeatureCollection", features: policialesData.features.filter(f => f.properties.dptodesc === dep) };
+    policialesLayer = L.geoJSON(filtrado, {
+      pointToLayer: (feature, latlng) => L.marker(latlng, { icon: createMarkerIcon('policial') }),
+      onEachFeature: onEachPolicial
+    }).addTo(map);
+  }
+  // Salud
+  if (saludData && saludLayer) {
+    map.removeLayer(saludLayer);
+    const filtrado = dep === "all" ? saludData : { type: "FeatureCollection", features: saludData.features.filter(f => f.properties.dptodesc === dep) };
+    saludLayer = L.geoJSON(filtrado, {
+      pointToLayer: (feature, latlng) => L.marker(latlng, { icon: createMarkerIcon('psicologico') }),
+      onEachFeature: onEachSalud
+    }).addTo(map);
+  }
+}
+
+function filterByDepartamento(value) {
+  filtrarPorDepartamento(value);
+}
+
+function cargarGeoJSON(url, categoria, popupFn) {
+  fetch(url)
+    .then(r => r.json())
+    .then(data => {
+      if (url.includes('policiales')) {
+        policialesData = data;
+        cargarDepartamentos(data);
+        policialesLayer = L.geoJSON(data, {
+          pointToLayer: (feature, latlng) => L.marker(latlng, { icon: createMarkerIcon(categoria) }),
+          onEachFeature: popupFn
+        }).addTo(map);
+      } else {
+        saludData = data;
+        saludLayer = L.geoJSON(data, {
+          pointToLayer: (feature, latlng) => L.marker(latlng, { icon: createMarkerIcon(categoria) }),
+          onEachFeature: popupFn
+        }).addTo(map);
+      }
+    })
+    .catch(e => console.log("No se pudo cargar " + url, e));
+}
+
+function onEachPolicial(feature, layer) {
+  const p = feature.properties;
+  layer.bindPopup(`
+    <b>${p.nombref || "Puesto Policial"}</b><br>
+    📍 ${p.barlocdesc || ""}<br>
+    🏘️ ${p.distdesc || ""}<br>
+    🗺️ ${p.dptodesc || ""}<br>
+    🏢 ${p.desc_class || ""}
+  `);
+}
+
+function onEachSalud(feature, layer) {
+  const p = feature.properties;
+  layer.bindPopup(`
+    <b>${p.nombre || p.nombref || "Centro de Salud"}</b><br>
+    📍 ${p.barlocdesc || p.direccion || ""}<br>
+    🏘️ ${p.distdesc || ""}<br>
+    🗺️ ${p.dptodesc || ""}
+  `);
+}
+
+// Cargar ambas capas
+cargarGeoJSON('locales_policiales.geojson', 'policial', onEachPolicial);
+cargarGeoJSON('locales_de_salud.geojson', 'psicologico', onEachSalud);
 
 // Init
 renderCards();
